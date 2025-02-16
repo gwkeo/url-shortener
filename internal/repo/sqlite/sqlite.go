@@ -10,7 +10,29 @@ type Repo struct {
 	db *sql.DB
 }
 
-func New() *Repo { return &Repo{db: nil} }
+func New(dbPath string) (*Repo, error) {
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return nil, err
+	}
+
+	stmt, err := db.Prepare(`
+		CREATE TABLE IF NOT EXISTS urls (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			url TEXT NOT NULL,
+			shortened_url TEXT UNIQUE NOT NULL)`)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Repo{db: db}, nil
+}
 
 func (r *Repo) Create(url, shortened string) (int64, error) {
 	stmt, err := r.db.Prepare(`INSERT INTO urls (origin, shortened) VALUES (?, ?)`)
