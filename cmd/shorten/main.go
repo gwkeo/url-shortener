@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gwkeo/url-shortener/internal/config"
 	"log/slog"
 	"os"
 )
@@ -12,8 +13,9 @@ const (
 )
 
 func main() {
-	cfg :=
-	log := setUpLogger("LOCAL")
+	cfg := config.MustLoad()
+	log := setUpLogger(cfg.Env)
+	log.Info("starting shortener")
 }
 
 func setUpLogger(env string) *slog.Logger {
@@ -26,4 +28,5 @@ func setUpLogger(env string) *slog.Logger {
 	case envDebug:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
+	return log
 }
