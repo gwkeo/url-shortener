@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/gwkeo/url-shortener/internal/repo"
+	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
 type Repo struct {
@@ -34,28 +35,23 @@ func New(dbPath string) (*Repo, error) {
 	return &Repo{db: db}, nil
 }
 
-func (r *Repo) Create(url, shortened string) (int64, error) {
-	stmt, err := r.db.Prepare(`INSERT INTO urls (origin, shortened) VALUES (?, ?)`)
+func (r *Repo) Create(url, shortened string) error {
+	stmt, err := r.db.Prepare(`INSERT INTO urls (url, shortened_url) VALUES (?, ?)`)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	result, err := stmt.Exec(url, shortened)
+	_, err = stmt.Exec(url, shortened)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	shortenedUrl, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return shortenedUrl, nil
+	return nil
 }
 
 func (r *Repo) URL(shortURL string) (string, error) {
 
-	stmt, err := r.db.Prepare(`SELECT origin FROM urls WHERE shortened = ?`)
+	stmt, err := r.db.Prepare(`SELECT url FROM urls WHERE shortened_url = ?`)
 	if err != nil {
 		return "", err
 	}

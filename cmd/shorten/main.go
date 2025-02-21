@@ -2,7 +2,8 @@ package main
 
 import (
 	"github.com/gwkeo/url-shortener/internal/config"
-	"github.com/gwkeo/url-shortener/internal/http-server/router"
+	"github.com/gwkeo/url-shortener/internal/http-server/server"
+	"github.com/gwkeo/url-shortener/internal/repo/sqlite"
 	"log/slog"
 	"os"
 )
@@ -17,7 +18,15 @@ func main() {
 	cfg := config.MustLoad()
 	log := setUpLogger(cfg.Env)
 	log.Info("starting shortener")
-	router := router.New(log)
+
+	repo, err := sqlite.New(cfg.StoragePath)
+	if err != nil {
+		log.Error("error opening sqlite repo", "error", err)
+	}
+	router := server.New(repo, log, cfg)
+	if err = router.Start(); err != nil {
+		log.Error("error starting shortener", "error", err)
+	}
 }
 
 func setUpLogger(env string) *slog.Logger {
