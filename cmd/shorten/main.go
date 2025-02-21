@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gwkeo/url-shortener/internal/config"
+	"github.com/gwkeo/url-shortener/internal/http-server/router"
 	"log/slog"
 	"os"
 )
@@ -16,6 +17,7 @@ func main() {
 	cfg := config.MustLoad()
 	log := setUpLogger(cfg.Env)
 	log.Info("starting shortener")
+	router := router.New(log)
 }
 
 func setUpLogger(env string) *slog.Logger {

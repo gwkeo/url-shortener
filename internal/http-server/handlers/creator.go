@@ -1,5 +1,7 @@
 package handlers
 
+import "net/http"
+
 type Creator interface {
 	Create(url, shortened string) (int64, error)
 }
@@ -14,7 +16,8 @@ func NewShortener(c Creator) *Shortener {
 	}
 }
 
-func Shorten() error {
+func Shorten() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	return nil
+	}
 }
